@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>在线答题</title>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script type="text/javascript" src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+    <script type="text/javascript" src="//cdn.bootcss.com/socket.io/1.5.1/socket.io.min.js"></script>
+    <script src="/static/layer_mobile/layer.js"></script>
+</head>
+<style>
+    .selected {
+        background-color: green;
+        color: antiquewhite;
+        border-radius: 5px;
+    }
+
+    .error {
+        background-color: #FD482C;
+        color: yellow;
+        border-radius: 5px;
+    }
+
+    #wait_for1, #wait_for2, #daojishi {
+        text-align: center;
+        font-size: 18px;
+        margin-top: 20px;
+    }
+
+    #daojishi {
+        font-size: 40px;
+        font-weight: 600;
+        color: rebeccapurple;
+    }
+
+    #optionA, #optionB, #optionC, #timu {
+        font-size: 15px;
+    }
+</style>
+<body>
+<div style="border: 1px solid goldenrod;border-radius: 8px; background-color:#F6F6F6;width: 80%;height: 350px;margin-top: 20px;"
+     class="center-block">
+    <p id="wait_for1"></p>
+    <p id="wait_for2"></p>
+    <p id="daojishi"></p>
+    <div style="width: 70%;margin: auto;" id="timudiv">
+        <p id="timu"></p>
+        <p onclick="emit_answer('A')" id="optionA"></p>
+        <p onclick="emit_answer('B')" id="optionB"></p>
+        <p onclick="emit_answer('C')" id="optionC"></p>
+    </div>
+</div>
+<script type="text/javascript">
+    var my_alert = function (msg) {
+        layer.open({
+            content: msg
+            , skin: 'msg'
+            , time: 3
+        });
+    }
+    var entered = false
+    var join, emit_answer, can_answer = true, can_click = true
+    var user_id = Math.floor((Math.random() * 5) + 1)
+    $(document).ready(function () {
+        var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
+        socket.on('join', function (res) {
+            if (res.success && !entered) {
+                if (res.can_enter) {
+                    socket.emit('shijian')
+                    socket.emit('enter', {'id': user_id})
+                } else {
+                    $("#wait_for1").text(res.msg).show()
+                }
+            }
+        });
+        socket.on('wait_for', function (data) {
+            $("#wait_for2").text(data.now + '  在线' + data.online + '人')
+            $("#wait_for1").hide()
+        });
+        socket.on('enter', function (data) {
+            entered = true
+            $("#enter").hide()
+        });
+        socket.on('timu', function (data) {
+            $("#wait_for1").hide()
+            $("#timu").text(data.num + '.' + data.timu.timu)
+            $("#optionA").text('A.' + data.timu.A)
+            $("#optionB").text('B.' + data.timu.B)
+            $("#optionC").text('C.' + data.timu.C)
+            $("#timudiv").show()
+            $("#daojishi").hide()
+            $('.selected').removeClass('selected')
+            $('.error').removeClass('error')
+            can_click = true
+        });
+        socket.on('timeout', function (data) {
+            //$("#daojishi").text('答题结束！').show()
+            $("#timudiv").hide()
+        });
+        socket.on('daojishi', function (data) {
+            var num = data.num
+            $("#daojishi").text(num).show()
+            $("#timudiv").hide()
+        });
+
+        socket.on('answer_result', function (data) {
+            if (data.yes) {
+                my_alert('恭喜你，答对了！')
+            } else {
+                can_answer = false
+                if (data.submit) {
+                    my_alert('很遗憾，你已出局！')
+                }
+            }
+        });
+        socket.on('success', function (data) {
+            layer.open({
+                content: data.msg
+                , btn: '我知道了'
+            });
+        });
+        socket.on('fail', function () {
+            layer.open({
+                content: '无人通关成功！'
+                , btn: '我知道了'
+            });
+        });
+        socket.on('ongoing', function () {
+            can_answer = false
+            my_alert('答题进行中，你已错过！')
+        });
+        socket.on('correct_answer', function (data) {
+            my_alert('正确答案是:' + data.answer)
+        });
+
+        emit_answer = function (answer) {
+            if (can_click) {
+                if (can_answer) {
+                    $('.selected').removeClass('selected')
+                    $('.error').removeClass('error')
+                    $("#option" + answer).addClass('selected')
+                    socket.emit('subAnswer', {'result': answer})
+                } else {
+                    $('.error').removeClass('error')
+                    $("#option" + answer).addClass('error')
+                    my_alert('你已出局!')
+                }
+                can_click = false
+            }
+        }
+    });
+</script>
+</body>
+</html>
