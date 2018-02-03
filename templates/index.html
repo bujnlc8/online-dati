@@ -66,7 +66,7 @@
         socket.on('join', function (res) {
             if (res.success) {
                 if (res.can_enter) {
-                    socket.emit('enter', {'id': user_id, 'open': res.open})
+                    socket.emit('enter', {'id': user_id})
                 }
                 $("#tips").text(res.msg)
             }

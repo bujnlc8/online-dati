@@ -58,14 +58,14 @@ def disconnect():
 @socketio.on('enter')
 def enter(msg):
     room = request.sid
-    open = int(msg.get('open', 0))
     join_room(room, request.sid)
     main.rooms.add(room)
     main.live_sids.add(room)
     main.user_map.update({room: msg['id']})
     with thread_lock:
-            if open == 1:
-                socketio.start_background_task(target=main.start)
+        global thread
+        if thread is None:
+            thread = socketio.start_background_task(target=main.start)
 
 
 @socketio.on('subAnswer')
