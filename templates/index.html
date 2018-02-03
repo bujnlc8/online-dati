@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>在线答题</title>
+    <title>百万闯关</title>
     <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css"
           integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <script type="text/javascript" src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
@@ -23,7 +23,7 @@
         border-radius: 5px;
     }
 
-    #wait_for1, #wait_for2, #daojishi {
+    #tips, #daojishi {
         text-align: center;
         font-size: 18px;
         margin-top: 20px;
@@ -42,8 +42,7 @@
 <body>
 <div style="border: 1px solid goldenrod;border-radius: 8px; background-color:#F6F6F6;width: 80%;height: 350px;margin-top: 20px;"
      class="center-block">
-    <p id="wait_for1"></p>
-    <p id="wait_for2"></p>
+    <p id="tips"></p>
     <p id="daojishi"></p>
     <div style="width: 70%;margin: auto;" id="timudiv">
         <p id="timu"></p>
@@ -60,31 +59,19 @@
             , time: 3
         });
     }
-    var entered = false
     var join, emit_answer, can_answer = true, can_click = true
     var user_id = Math.floor((Math.random() * 5) + 1)
     $(document).ready(function () {
         var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
         socket.on('join', function (res) {
-            if (res.success && !entered) {
+            if (res.success) {
                 if (res.can_enter) {
-                    socket.emit('shijian')
-                    socket.emit('enter', {'id': user_id})
-                } else {
-                    $("#wait_for1").text(res.msg).show()
+                    socket.emit('enter', {'id': user_id, 'open': res.open})
                 }
+                $("#tips").text(res.msg)
             }
         });
-        socket.on('wait_for', function (data) {
-            $("#wait_for2").text(data.now + '  在线' + data.online + '人')
-            $("#wait_for1").hide()
-        });
-        socket.on('enter', function (data) {
-            entered = true
-            $("#enter").hide()
-        });
         socket.on('timu', function (data) {
-            $("#wait_for1").hide()
             $("#timu").text(data.num + '.' + data.timu.timu)
             $("#optionA").text('A.' + data.timu.A)
             $("#optionB").text('B.' + data.timu.B)

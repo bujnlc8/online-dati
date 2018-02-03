@@ -6,27 +6,37 @@ from flask import Flask, request
 from flask_socketio import SocketIO, join_room, leave_room
 from werkzeug.utils import import_string
 
-from controller.main import Main, answers
+from controller.main import Main
+from ext import db
 
 thread_lock = Lock()
 thread_lock2 = Lock()
-thread_lock3 = Lock()
 thread = None
 thread2 = None
-thread3 = None
 
 blueprints = ['views.index:bp']
 
-App = Flask(__name__)
-for blueprint in blueprints:
-    p = import_string(blueprint)
-    App.register_blueprint(p)
+
+def create_app():
+    app = Flask(__name__)
+    app.config.from_object('envcfg.json.dati')
+    for blueprint in blueprints:
+        p = import_string(blueprint)
+        app.register_blueprint(p)
+    db.init_app(app)
+    return app
+
+App = create_app()
 socketio = SocketIO(App)
 main = Main(socketio)
 
 
 @socketio.on('connect')
 def join():
+    with App.app_context():
+        from models.models import Game
+        game = Game.get_latest()
+        main.set_game(game)
     main.rooms.add(request.sid)
     join_room(request.sid, request.sid)
     global thread2
@@ -36,13 +46,6 @@ def join():
             return
         if thread2 is None:
             thread2 = socketio.start_background_task(target=main.join)
-
-@socketio.on('shijian')
-def shijian():
-    global thread3
-    with thread_lock3:
-        if thread3 is None:
-            thread3 = socketio.start_background_task(target=main.wait_for)
 
 
 @socketio.on('disconnect')
@@ -54,16 +57,15 @@ def disconnect():
 
 @socketio.on('enter')
 def enter(msg):
-    main.enter(msg['id'])
     room = request.sid
+    open = int(msg.get('open', 0))
     join_room(room, request.sid)
     main.rooms.add(room)
     main.live_sids.add(room)
     main.user_map.update({room: msg['id']})
-    global thread
     with thread_lock:
-        if thread is None:
-            thread = socketio.start_background_task(target=main.start)
+            if open == 1:
+                socketio.start_background_task(target=main.start)
 
 
 @socketio.on('subAnswer')
@@ -71,7 +73,7 @@ def subAnswer(data):
     result = data['result']
     sid = request.sid
     main.submit_sids.add(sid)
-    if answers.get(str(main.q_no)) == result:
+    if main.answers.get(main.questions[main.q_no].get('id')) == result:
         main.yes_ids.add(sid)
         main.send_message('answer_result', {'yes': True, 'submit': True}, room=sid)
     else:
@@ -80,4 +82,4 @@ def subAnswer(data):
 
 
 if __name__ == '__main__':
-    socketio.run(App, host='192.168.1.3',port=8888, debug=True)
+    socketio.run(App, host='192.168.1.15',port=8888, debug=True)
