@@ -55,13 +55,16 @@ class Main(object):
 
     def start(self):
         while True:
+            from app import App
+            from models.models import Question
+            App.app_context().push()
+            from models.models import Game
+            game = Game.get_latest()
+            self.set_game(game)
             now = datetime.now()
             while now < self.start_time:
                 self.socketio.sleep(1)
                 now = datetime.now()
-            from app import App
-            from models.models import Question
-            App.app_context().push()
             questions, answers = Question.get_timus(self.game.timu_total)
             self.questions = questions
             self.answers = answers
@@ -123,7 +126,7 @@ class Main(object):
             msg = ''
             if now <= self.start_time:
                 can_enter = True
-                msg = '{}开始！'.format(self.start_time.strftime('%Y-%m-%d %H:%M:%S'))
+                msg = '下场{}开始！'.format(self.start_time.strftime('%Y-%m-%d %H:%M:%S'))
             else:
                 can_enter = False
                 msg = now.strftime('%Y-%m-%d %H:%M:%S') + ' 在线' + str(len(self.rooms)) + '人'

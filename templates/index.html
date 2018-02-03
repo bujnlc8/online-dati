@@ -107,16 +107,18 @@
                 content: data.msg
                 , btn: '我知道了'
             });
+            can_answer = true
         });
         socket.on('fail', function () {
             layer.open({
                 content: '无人通关成功！'
                 , btn: '我知道了'
             });
+            can_answer = true
         });
         socket.on('ongoing', function () {
             can_answer = false
-            my_alert('答题进行中，你已错过！')
+            my_alert('答题进行中，你可以围观！')
         });
         socket.on('correct_answer', function (data) {
             my_alert('正确答案是:' + data.answer)
