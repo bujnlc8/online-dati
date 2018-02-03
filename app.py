@@ -75,10 +75,14 @@ def subAnswer(data):
     main.submit_sids.add(sid)
     if main.answers.get(main.questions[main.q_no].get('id')) == result:
         main.yes_ids.add(sid)
-        main.send_message('answer_result', {'yes': True, 'submit': True}, room=sid)
     else:
         main.live_sids.discard(sid)
-        main.send_message('answer_result', {'yes': False, 'submit': True}, room=sid)
+    if result == 'A':
+        main.optionA += 1
+    elif result == 'B':
+        main.optionB += 1
+    elif result == 'C':
+        main.optionC += 1
 
 
 if __name__ == '__main__':

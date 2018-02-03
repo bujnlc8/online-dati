@@ -41,8 +41,7 @@ class Game(db.Model):
         now = datetime.now()
         o = cls.query.filter(cls.stop == 0).order_by(cls.id).first()
         if not o:
-            return cls(
-                datetime.now() + timedelta(minutes=5), 5000, 12, 10, 6, 0)
+            return cls(datetime(2018,12,31), 5000, 12, 10, 6, 0)
         return o
 
     def get_by_id(self):

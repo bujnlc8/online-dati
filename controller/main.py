@@ -22,6 +22,9 @@ class Main(object):
         self.submit_sids = set()
         self.live_sids = set()
         self.on_going = False
+        self.optionA = 0
+        self.optionB = 0
+        self.optionC = 0
 
     @property
     def start_time(self):
@@ -52,6 +55,9 @@ class Main(object):
         self.submit_sids = set()
         self.live_sids = set()
         self.on_going = False
+        self.optionA = 0
+        self.optionB = 0
+        self.optionC = 0
 
     def start(self):
         while True:
@@ -74,6 +80,9 @@ class Main(object):
                 for i in range(0, self.timu_daojishi):
                     self.send_message('daojishi', {'num': self.timu_daojishi - i})
                     self.socketio.sleep(1)
+                self.optionA = 0
+                self.optionB = 0
+                self.optionC = 0
                 self.on_going = True
                 self.q_no = num
                 self.send_message('timu', {'timu': questions[num], 'num': num + 1})
@@ -81,14 +90,23 @@ class Main(object):
                 self.submit_sids = set()
                 # 派发题目, 开始答题
                 self.socketio.sleep(self.dati_shijian)
-                # self.send_message('timeout')
-                # 统计答案，等待结果
-                self.send_message('wait_for_result')
+                # 发送时间到的消息
+                self.send_message('timeout')
                 fail_sids = self.rooms - self.yes_ids
+                # 回答错误或未答用户发送消息
                 for sid in fail_sids:
                     submit = True if sid in self.submit_sids.union(self.live_sids) else False
                     self.live_sids.discard(sid)
-                    self.send_message('answer_result', {'yes': False, 'submit': submit}, room=sid)
+                    self.send_message('answer_result', {'yes': False, 'submit': submit,
+                                                        'A': self.optionA, 'B': self.optionB,
+                                                        'C': self.optionC,
+                                                        'answer': answers.get(questions[num].get('id'))}, room=sid)
+                # 回答正确的发送消息
+                for sid in self.yes_ids:
+                    self.send_message('answer_result', {'yes': True, 'submit': True,
+                                                        'A': self.optionA, 'B': self.optionB,
+                                                        'C': self.optionC,
+                                                        'answer': answers.get(questions[num].get('id'))}, room=sid)
                 self.socketio.sleep(2)
                 self.send_message('correct_answer', {
                     'answer': answers.get(questions[num].get('id'))})
@@ -106,7 +124,7 @@ class Main(object):
                                 len(self.yes_ids))}, room=sid)
                     if len(self.yes_ids) == 0:
                         self.send_message('fail')
-            self.game.update(stop=1)
+                    self.game.update(stop=1)
             self.clear()
 
     def send_message(self, event, message=None, namespace=None, room=None):
@@ -129,6 +147,6 @@ class Main(object):
                 msg = '下场{}开始！'.format(self.start_time.strftime('%Y-%m-%d %H:%M:%S'))
             else:
                 can_enter = False
-                msg = now.strftime('%Y-%m-%d %H:%M:%S') + ' 在线' + str(len(self.rooms)) + '人'
+                msg = now.strftime('%Y-%m-%d %H:%M:%S') + ' 在线' + str(len(self.rooms)) + '人   '+ str(self.q_no+1) +'/'+str(self.timu_total)
             self.socketio.emit('join', {'success': True, 'can_enter': can_enter, 'msg': msg})
             self.socketio.sleep(1)
