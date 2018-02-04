@@ -36,7 +36,7 @@
         font-weight: 600;
         color: rebeccapurple;
         text-align: center;
-        margin-top: 115px;
+        margin-top: 110px;
     }
 
     #optionA, #optionB, #optionC, #timu {
@@ -55,10 +55,11 @@
         border-radius: 5px;
     }
 </style>
-<body>
-<div style="border: 1px solid goldenrod;border-radius: 8px; background-color:#F6F6F6;width: 80%;height: 350px;margin-top: 20px;"
+<body style="background-color: #F6F6F6;">
+<div style="border: 1px solid goldenrod;border-radius: 8px; background-color:#FFF8DC;width: 80%;height: 350px;margin-top: 20px;"
      class="center-block">
     <p id="tips"></p>
+    <p id="fuhuoka" style="text-align: center;font-size: 13px;font-weight: bold;font-family: "Helvetica Neue", Helvetica, Arial, sans-serif"></p>
     <p id="daojishi"></p>
     <div style="width: 70%;margin: auto;" id="timudiv">
         <p id="timu" style="height: 50px;font-size: 13px;font-weight: 500;"></p>
@@ -79,8 +80,8 @@
         });
     }
     var join, emit_answer, can_answer = true, can_click = false
-    //var user_id = Math.floor((Math.random() * 5) + 1)
-    var user_id = 1
+    var user_id = Math.floor((Math.random() * 5) + 1)
+    //var user_id = 1
     $(document).ready(function () {
         var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
         socket.on('join', function (res) {
@@ -162,6 +163,9 @@
         socket.on('relive', function () {
             my_alert('你已复活！')
             can_answer = true
+        });
+        socket.on('fuhuoka', function (data) {
+            $("#fuhuoka").text('复活卡：' + data.num)
         });
         emit_answer = function (answer) {
             if (can_click) {

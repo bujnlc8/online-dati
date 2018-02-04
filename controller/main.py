@@ -165,4 +165,10 @@ class Main(object):
                 can_enter = False
                 msg = now.strftime('%Y-%m-%d %H:%M:%S') + ' 在线' + str(len(self.rooms)) + '人   '+ str(self.q_no+1) +'/'+str(self.timu_total)
             self.socketio.emit('join', {'success': True, 'can_enter': can_enter, 'msg': msg})
+            with App.app_context():
+                from models.models import ReliveCard
+                for sid in self.rooms:
+                    user_id = self.user_map.get(sid, '')
+                    card_num = ReliveCard.card_num(user_id)
+                    self.send_message('fuhuoka', {'num': card_num}, room=sid)
             time.sleep(1)

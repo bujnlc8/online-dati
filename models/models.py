@@ -162,3 +162,10 @@ class ReliveCard(db.Model):
                 db.session.commit()
                 return True
         return False
+
+    @classmethod
+    def card_num(cls, user_id):
+        exist = cls.query.filter(cls.user_id == user_id).first()
+        if exist:
+            return exist.num
+        return 0
