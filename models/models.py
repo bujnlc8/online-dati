@@ -33,7 +33,7 @@ class Game(db.Model):
     @classmethod
     def add(cls, start_time, money, timu_total, daojishi, dati_shijian):
         db.session.add(
-            cls(start_time, money, timu_total, daojishi, dati_shijian))
+            cls(start_time, money, timu_total, daojishi, dati_shijian, 0))
         db.session.commit()
 
     @classmethod
@@ -41,7 +41,7 @@ class Game(db.Model):
         now = datetime.now()
         o = cls.query.filter(cls.stop == 0).order_by(cls.id).first()
         if not o:
-            return cls(datetime(2018,12,31), 5000, 12, 10, 6, 0)
+            return cls(datetime(2018, 12, 31), 5000, 12, 10, 6, 0)
         return o
 
     def get_by_id(self):
@@ -53,6 +53,7 @@ class Game(db.Model):
             o.__setattr__(k, v)
         db.session.add(o)
         db.session.commit()
+
 
 class Question(db.Model):
     __tablename__ = 'questions'
@@ -97,6 +98,7 @@ class Question(db.Model):
                                'A': x.optionA, 'B': x.optionB, 'C': x.optionC})
             timus_answer.update({x.id: x.answer})
         return timus_list, timus_answer
+
 
 class UserMoney(db.Model):
     __tablename__ = 'user_money'

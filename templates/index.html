@@ -15,24 +15,28 @@
         background-color: green;
         color: antiquewhite;
         border-radius: 5px;
+        width: 220px;
     }
 
     .error {
         background-color: #FD482C;
         color: yellow;
         border-radius: 5px;
+        width: 220px;
     }
 
-    #tips, #daojishi {
+    #tips {
         text-align: center;
-        font-size: 18px;
+        font-size: 12px;
         margin-top: 20px;
     }
 
     #daojishi {
-        font-size: 40px;
+        font-size: 55px;
         font-weight: 600;
         color: rebeccapurple;
+        text-align: center;
+        margin-top: 35%;
     }
 
     #optionA, #optionB, #optionC, #timu {
@@ -57,7 +61,7 @@
     <p id="tips"></p>
     <p id="daojishi"></p>
     <div style="width: 70%;margin: auto;" id="timudiv">
-        <p id="timu" style="height: 45px;"></p>
+        <p id="timu" style="height: 50px;font-size: 13px;font-weight: 500;"></p>
         <p onclick="emit_answer('A')" id="optionA"></p>
         <span class="jindutiao" id="jindutiaoA"></span>
         <p onclick="emit_answer('B')" id="optionB"></p>
@@ -117,12 +121,12 @@
             }
             var total_num = data.A + data.B + data.C
             var answer = data.answer
-            var jindutiaoAWidth = total_num > 0 ? data.A/total_num * 150 +'px' : '0px'
-            var jindutiaoBWidth = total_num > 0 ? data.B/total_num * 150 +'px' : '0px'
-            var jindutiaoCWidth = total_num > 0 ? data.C/total_num * 150 +'px' : '0px'
-            $("#optionA").append('<span class="answer_num">'+data.A+'/'+total_num+'</span>').removeClass('selected')
-            $("#optionB").append('<span class="answer_num">'+data.B+'/'+total_num+'</span>').removeClass('selected')
-            $("#optionC").append('<span class="answer_num">'+data.C+'/'+total_num+'</span>').removeClass('selected')
+            var jindutiaoAWidth = total_num > 0 ? data.A/total_num * 220 +'px' : '220px'
+            var jindutiaoBWidth = total_num > 0 ? data.B/total_num * 220 +'px' : '220px'
+            var jindutiaoCWidth = total_num > 0 ? data.C/total_num * 220 +'px' : '220px'
+            $("#optionA").append('<span class="answer_num">'+data.A+'/'+total_num+'</span>').removeClass('selected').removeClass('error')
+            $("#optionB").append('<span class="answer_num">'+data.B+'/'+total_num+'</span>').removeClass('selected').removeClass('error')
+            $("#optionC").append('<span class="answer_num">'+data.C+'/'+total_num+'</span>').removeClass('selected').removeClass('error')
             $("#jindutiaoA").css({'display': 'block', 'width': jindutiaoAWidth,
                 'background-color': answer=='A'?'green':'red'})
             $("#jindutiaoB").css({'display': 'block', 'width': jindutiaoBWidth,
