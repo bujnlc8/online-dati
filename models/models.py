@@ -129,3 +129,36 @@ class User(db.Model):
 
     def __init__(self, name):
         self.name = name
+
+
+class ReliveCard(db.Model):
+    __tablename__ = 'relive_card'
+
+    id = Column(Integer, primary_key=True)
+    num = Column(Integer, nullable=False, server_default=text("'0'"))
+    user_id = Column(Integer, nullable=False)
+
+    def __init__(self, num, user_id):
+        self.num = num
+        self.user_id = user_id
+
+    @classmethod
+    def add(cls, user_id):
+        exist = cls.query.filter(cls.user_id == user_id).first()
+        if exist:
+            exist.num += 1
+        else:
+            exist = cls(1, user_id)
+        db.session.add(exist)
+        db.session.commit()
+
+    @classmethod
+    def use(cls, user_id):
+        exist = cls.query.filter(cls.user_id == user_id).first()
+        if exist:
+            if exist.num >= 1:
+                exist.num -= 1
+                db.session.add(exist)
+                db.session.commit()
+                return True
+        return False

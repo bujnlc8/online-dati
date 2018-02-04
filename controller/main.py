@@ -4,11 +4,7 @@ from datetime import datetime, timedelta
 import time
 
 user_name = {
-    '1': '小王',
-    '2': '小晨',
-    '3': '小凌',
-    '4': '小海',
-    '5': '小辉'
+    '1': '小凌',
 }
 
 
@@ -26,6 +22,7 @@ class Main(object):
         self.optionA = 0
         self.optionB = 0
         self.optionC = 0
+        self.relive = set()
 
     @property
     def start_time(self):
@@ -59,6 +56,7 @@ class Main(object):
         self.optionA = 0
         self.optionB = 0
         self.optionC = 0
+        self.relive = set()
 
     def start(self):
         while True:
@@ -90,6 +88,7 @@ class Main(object):
                     self.send_message('timu', {'timu': questions[num], 'num': num + 1})
                     self.yes_ids = set()
                     self.submit_sids = set()
+                    self.relive = set()
                     # 派发题目, 开始答题
                     time.sleep(self.dati_shijian)
                     # 发送时间到的消息
@@ -104,27 +103,40 @@ class Main(object):
                                                             'A': self.optionA, 'B': self.optionB,
                                                             'C': self.optionC,
                                                             'answer': answers.get(questions[num].get('id'))}, room=sid)
+                        user_id = self.user_map.get(sid)
+                        if user_id:
+                            from models.models import ReliveCard
+                            if ReliveCard.use(user_id):
+                                self.live_sids.add(sid)
+                                self.relive.add(sid)
                     # 回答正确的发送消息
                     for sid in self.yes_ids:
                         self.send_message('answer_result', {'yes': True, 'submit': True,
                                                             'A': self.optionA, 'B': self.optionB,
                                                             'C': self.optionC,
                                                             'answer': answers.get(questions[num].get('id'))}, room=sid)
+                    for sid in self.relive:
+                        self.send_message('relive', room=sid)
                     time.sleep(2)
-                    self.send_message('correct_answer', {
-                        'answer': answers.get(questions[num].get('id'))})
+                    for sid in fail_sids:
+                        self.send_message('correct_answer', {
+                            'answer': answers.get(questions[num].get('id'))}, room=sid)
                     time.sleep(3)
                     # 最后一题 给出通关人数
                     if num == self.timu_total - 1:
+                        from models.models import ReliveCard
                         for sid in self.yes_ids:
                             user_id = self.user_map.get(sid)
-                            user = user_name.get(str(user_id))
+                            # user = user_name.get(str(user_id))
                             from models.models import UserMoney
                             UserMoney.add(self.game.id, user_id, self.total_money / len(self.yes_ids))
                             self.send_message('success', {
-                                'msg': '恭喜你！{}，你获得{}元奖励！总共{}人闯关成功!'.format(
-                                    user, self.total_money / len(self.yes_ids),
+                                'msg': '恭喜你！，你获得{}元奖励！总共{}人闯关成功！'.format(
+                                    self.total_money / len(self.yes_ids),
                                     len(self.yes_ids))}, room=sid)
+                            user_id = self.user_map.get(sid, '')
+                            if user_id:
+                                ReliveCard.add(user_id)
                         if len(self.yes_ids) == 0:
                             self.send_message('fail')
                         self.game.update(stop=1)

@@ -7,4 +7,4 @@ do
     fi
 done
 
-gunicorn -k gevent -w 1 -b 192.168.1.15:8888  app:App
+gunicorn -k gevent -w 1 -b 192.168.1.9:8888  app:App
