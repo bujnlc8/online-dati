@@ -131,7 +131,7 @@ class Main(object):
                             from models.models import UserMoney
                             UserMoney.add(self.game.id, user_id, self.total_money / len(self.yes_ids))
                             self.send_message('success', {
-                                'msg': '恭喜你！，你获得{}元奖励！总共{}人闯关成功！'.format(
+                                'msg': '恭喜你！你获得{}元奖励！总共{}人闯关成功！'.format(
                                     self.total_money / len(self.yes_ids),
                                     len(self.yes_ids))}, room=sid)
                             user_id = self.user_map.get(sid, '')
@@ -167,8 +167,11 @@ class Main(object):
             self.socketio.emit('join', {'success': True, 'can_enter': can_enter, 'msg': msg})
             with App.app_context():
                 from models.models import ReliveCard
-                for sid in self.rooms:
-                    user_id = self.user_map.get(sid, '')
-                    card_num = ReliveCard.card_num(user_id)
-                    self.send_message('fuhuoka', {'num': card_num}, room=sid)
+                try:
+                    for sid in self.rooms:
+                        user_id = self.user_map.get(sid, '')
+                        card_num = ReliveCard.card_num(user_id)
+                        self.send_message('fuhuoka', {'num': card_num}, room=sid)
+                except Exception as e:
+                    print e
             time.sleep(1)
