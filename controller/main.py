@@ -116,8 +116,9 @@ class Main(object):
                                                             'C': self.optionC,
                                                             'answer': answers.get(questions[num].get('id'))}, room=sid)
                     for sid in self.relive:
+                        self.yes_ids.add(sid)
                         self.send_message('relive', room=sid)
-                    time.sleep(2)
+                    time.sleep(3)
                     for sid in fail_sids:
                         self.send_message('correct_answer', {
                             'answer': answers.get(questions[num].get('id'))}, room=sid)
@@ -140,7 +141,7 @@ class Main(object):
                         if len(self.yes_ids) == 0:
                             self.send_message('fail')
                         self.game.update(stop=1)
-                Game.add(datetime.now() + timedelta(minutes=10), 5000, 12, 8, 10)
+                Game.add(datetime.now().replace(second=0,microsecond=0) + timedelta(minutes=3), 5000, 12, 8, 8)
                 self.clear()
 
     def send_message(self, event, message=None, namespace=None, room=None):
@@ -160,7 +161,7 @@ class Main(object):
             msg = ''
             if now <= self.start_time:
                 can_enter = True
-                msg = '下场{}开始！'.format(self.start_time.strftime('%Y-%m-%d %H:%M:%S'))
+                msg = '下场{}开始！'.format(self.start_time.strftime('%Y-%m-%d %H:%M'))
             else:
                 can_enter = False
                 msg = now.strftime('%Y-%m-%d %H:%M:%S') + ' 在线' + str(len(self.rooms)) + '人   '+ str(self.q_no+1) +'/'+str(self.timu_total)
