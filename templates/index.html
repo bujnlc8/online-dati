@@ -11,6 +11,16 @@
     <script src="/static/layer_mobile/layer.js"></script>
 </head>
 <style>
+    @keyframes plus{
+        0%{font-size:60px;}
+        50%{font-size: 50px;}
+        100%{font-size: 40px;}
+    }
+    @keyframes tips{
+        0%{font-size:12px;}
+        50%{font-size: 13px;}
+        100%{font-size: 14px;}
+    }
     .selected {
         background-color: green;
         color: antiquewhite;
@@ -26,22 +36,36 @@
     }
 
     #tips {
+        color: grey;
         text-align: center;
-        font-size: 12px;
         margin-top: 20px;
+        -webkit-animation-name: tips;
+        -webkit-animation-duration: 2s;
+        -webkit-animation-timing-function: linear;
+        -webkit-animation-delay: 0s;
+        -webkit-animation-iteration-count: infinite;
+        -webkit-animation-direction: alternate;
+        -webkit-animation-play-state: running;
     }
 
     #daojishi {
-        font-size: 55px;
         font-weight: 600;
         color: rebeccapurple;
         text-align: center;
-        margin-top: 110px;
+        margin-top: 85px;
+        -webkit-animation-name: plus;
+        -webkit-animation-duration: 1s;
+        -webkit-animation-timing-function: linear;
+        -webkit-animation-delay: 0s;
+        -webkit-animation-iteration-count: infinite;
+        -webkit-animation-play-state: running;
+
     }
 
     #optionA, #optionB, #optionC, #timu {
-        font-size: 15px;
+        font-size: 14px;
         height: 20px;
+        vertical-align: middle;
     }
     .answer_num{
         margin-left: 20px;
@@ -58,7 +82,7 @@
 <body style="background-color: #F6F6F6;">
 <div style="border: 1px solid goldenrod;border-radius: 8px; background-color:#FFF8DC;width: 80%;height: 350px;margin-top: 20px;"
      class="center-block">
-    <p id="tips"></p>
+    <p id="tips" style="height:20px;"></p>
     <p id="fuhuoka" style="text-align: center;font-size: 13px;font-weight: bold;font-family: "Helvetica Neue", Helvetica, Arial, sans-serif"></p>
     <p id="daojishi"></p>
     <div style="width: 70%;margin: auto;" id="timudiv">
@@ -127,8 +151,8 @@
             var jindutiaoBWidth = total_num > 0 ? data.B/total_num * 210 +'px' : '210px'
             var jindutiaoCWidth = total_num > 0 ? data.C/total_num * 210 +'px' : '210px'
             $("#optionA").append('<span class="answer_num">'+data.A+'/'+total_num+'</span>').removeClass('selected').removeClass('error')
-            $("#optionB").append('<span class="answer_num">'+data.B+'/'+total_num+'</span>').removeClass('selected').removeClass('error')
-            $("#optionC").append('<span class="answer_num">'+data.C+'/'+total_num+'</span>').removeClass('selected').removeClass('error')
+            $("#optionB").append('<span class="answer_num">'+data.B+'/'+total_num+'</span>').removeClass('selected').removeClass('error')            
+            $("#optionC").append('<span class="answer_num">'+data.C+'/'+total_num+'</span>').removeClass('selected').removeClass('error')            
             $("#jindutiaoA").css({'display': 'block', 'width': jindutiaoAWidth,
                 'background-color': answer=='A'?'green':'red'})
             $("#jindutiaoB").css({'display': 'block', 'width': jindutiaoBWidth,
